@@ -49,7 +49,7 @@ The final result is a dataframe conveniently called `df` (sorry for the bad nami
 2. Derived statistics:
 
 | Field | Explanation |
-| - | - |
+| --- | --- |
 | PercentagePerfect | (IVA+IVD+IVS)/45 |
 | CpEstimate | CP estimate according to CP formula (check) |
 | CpMin | minimum CP == 0 IVs |
