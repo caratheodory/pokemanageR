@@ -7,9 +7,12 @@ Creates a table (dataframe) with all information you need to be the very best (I
 
 Actively looking for feedback and contributors!
 
-![](assets/example.png)
-![](assets/example_plot.png)
+## Preview
+
+![](assets/example2.png)
 ![](assets/example_plot2.png)
+![](assets/example_plot.png)
+![](assets/example_plot3.png)
 
 ## Requirements
 
