@@ -185,11 +185,31 @@ lines(mapply(compute_cp_min, 16, levels$CpMultiplier), type="b")
 
 subdf <- subset(df, PokemonId != 0)
 hist(c(subdf$IndividualAttack, subdf$IndividualDefense, subdf$IndividualStamina),
-     breaks = seq(-0.5, 15.5, 1), main="IV histogram")
+     breaks = seq(-0.5, 15.5, 1), main="IV Histogram", col="lightgrey")
 
 hist(subdf$IndividualAttack + subdf$IndividualDefense +subdf$IndividualStamina,
-     breaks = seq(-0.5, 45.5, 1), main="aggregated IV histogram")
+     breaks = seq(-0.5, 45.5, 1), main="Aggregated IV Histogram", col="lightgrey")
 
 
 ```
+
+## Level distribution
+
+```{r PLOTS 5,  echo=FALSE}
+
+subdf <- subset(df, PokemonId != 0)
+hist(subdf$Level, breaks = seq(0.5, 40.5, 1), main="Level Histogram", col="lightgrey")
+
+```
+
+## Investigating the Pokedex IV "bug"
+
+```{r PLOTS 6,  echo=FALSE}
+
+plot(df[c("PokemonId", "IndividualAttack")], pch=15, main="Pokedex# vs IVA")
+
+
+```
+
+
 
