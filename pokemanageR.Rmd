@@ -1,0 +1,161 @@
+---
+title: "PokemanageR"
+author: "Caratheodory"
+date: "v0.31, 7 August 2016"
+output: html_document
+---
+
+<!-- Alternate table row background colours -->
+<style> tr:nth-child(even) {background-color: #f5f5f5;} </style>
+
+```{r SETUP, include=FALSE}
+
+require(knitr)
+source("functions.R")
+
+parse_response(file.path("response", "response.bin"), 
+               file.path("response", "inventory.txt"))
+df <- parse_inventory(file.path("response", "inventory.txt"))
+
+# set target level for powering up
+targetLevel <- 30
+
+```
+
+For an explanation of the different fields see [https://github.com/caratheodory/pokemanageR](https://github.com/caratheodory/pokemanageR).
+
+Any comments and feedback are appreciated!
+
+
+```{r READ GAME DATA, include=FALSE}
+
+# import game data
+baseStats <- read.table(file.path("game_data","GAME_MASTER_POKEMON_v0_2.tsv"), header=TRUE, sep="\t")
+name <- readLines(file.path("game_data","pokemon_names.txt"), warn=FALSE)
+levels <- read.table(file.path("game_data","cp_multipliers.csv"), header=TRUE, sep=",")
+stardust <- read.table(file.path("game_data","stardust.tsv"), header=TRUE, sep="\t")
+movesets <- read.table(file.path("game_data","movesets_prof_kukui_2016-07-30.csv"), header=TRUE, sep=",")
+basicMoves <- read.table(file.path("game_data","basic_moves_prof_kukui_2016-07-30.csv"), header=TRUE, sep=",", stringsAsFactors=FALSE)
+chargeMoves <- read.table(file.path("game_data","charge_moves_prof_kukui_2016-07-30.csv"), header=TRUE, sep=",", stringsAsFactors=FALSE)
+
+# convert to lookup table
+row.names(basicMoves) <- basicMoves$ID
+row.names(chargeMoves) <- chargeMoves$ID
+
+# Add pokemon names
+baseStats$Name <- name
+
+# Let's see if the CP formula is correct
+
+df$CpEstimate <- mapply(compute_cp, df$PokemonId, df$IndividualAttack, df$IndividualDefense, df$IndividualStamina, 
+                        df$CpMultiplier, df$AdditionalCpMultiplier)
+# df[c("Cp", "CpEstimate")]
+# nrow(df[df$Cp != df$CpEstimate & df$PokemonId != 0, ])
+
+# Add additional CP statistics
+df$CpMin <- mapply(compute_cp_min, df$PokemonId, df$CpMultiplier)
+df$CpMax <- mapply(compute_cp_max, df$PokemonId, df$CpMultiplier)
+df$CpPercentage <- 1 - (df$CpMax - df$CpEstimate) / (df$CpMax - df$CpMin)
+
+# compute levels
+df$Level <- unlist(lapply((df$CpMultiplier + df$AdditionalCpMultiplier), compute_level))
+
+# Add stardust
+df$Stardust <- unlist(lapply(df$Level, compute_stardust))
+
+# Add MaxCp
+df$MaxCp[df$PokemonId > 0] <- baseStats[df$PokemonId, "MaxCp"]
+
+# Add 
+df$CpTarget <- mapply(compute_cp, df$PokemonId, df$IndividualAttack, df$IndividualDefense, df$IndividualStamina, compute_cpmultiplier(30))
+df$CpTargetMax <- mapply(compute_cp_max, df$PokemonId, compute_cpmultiplier(30))
+df$CpTargetMin <- mapply(compute_cp_min, df$PokemonId, compute_cpmultiplier(30))
+
+# Add Stardust and Candy to levels dataframe
+levels$Stardust <- rep(stardust$Stardust, each=4)
+levels$Candy <- rep(stardust$Candy, each=4)
+
+# Add DustCost and CandyCost to evolve to targetLevel
+df$DustCost <- mapply(compute_dustcost, df$Level, targetLevel)
+df$CandyCost <- mapply(compute_candycost, df$Level, targetLevel)
+
+# max evolutions
+baseStats <- add_max_evolutions(baseStats)
+# baseStats[0:151, c("Name", "Evolution", "EvolutionInt", "MaxEvolutionInt")]
+
+# Add move names
+df$Move1 <- as.integer(df$Move1)
+df$Move2 <- as.integer(df$Move2)
+df$Move1Name <- basicMoves[as.character(df$Move1), "Name"]
+df$Move2Name <- chargeMoves[as.character(df$Move2), "Name"]
+
+# add names and max evolution
+df$Name[df$PokemonId > 0] <- baseStats$Name[df$PokemonId]
+df$Name[df$PokemonId == 0] <- "Egg"
+df$Nickname[df$PokemonId == 0] <- "Egg"
+df$MaxEvolutionId[df$PokemonId > 0] <- baseStats$MaxEvolutionInt[df$PokemonId]
+
+# add best movesets
+df <- add_best_movesets(df)
+
+# Add Cp of evo and evo at target level
+df$CpEvo <- mapply(compute_cp, df$MaxEvolutionId, df$IndividualAttack, df$IndividualDefense, 
+                   df$IndividualStamina, df$CpMultiplier)
+
+df$CpEvoTarget <- mapply(compute_cp, df$MaxEvolutionId, df$IndividualAttack, 
+                         df$IndividualDefense, df$IndividualStamina, compute_cpmultiplier(targetLevel))
+
+
+```
+
+# Order by PokemonId, PercentagePerfect
+
+This table can be used in conjunction with the view Pokemon > # in the app.
+
+```{r PRINT TABLES 1, echo=FALSE}
+
+output <- df[with(df, order(PokemonId, -PercentagePerfect)), 
+   c("PokemonId", "Cp", "Stamina", "IndividualAttack", "IndividualDefense", "IndividualStamina", "PercentagePerfect", "Level", "Nickname")]
+
+kable(output)
+
+
+```
+
+# Order by GymOffense
+
+Display my best offensive pokemons and the cost to evolve them to target level (30 by default).
+
+```{r PRINT TABLES 2, echo=FALSE}
+
+subdf <- subset(df, PokemonId != 0 & !is.na(GymOffense))
+
+output <- subdf[with(subdf, order(-GymOffense)), 
+   c("PokemonId", "Name", "PercentagePerfect", "Cp", "Level", "CpEvoTarget", "DustCost", "GymOffense", "TotalRankOffense", "TotalRankDefense")]
+kable(output)
+
+```
+
+# My best Offense and Defense
+
+Display all pokemon/moveset combinations that make it to the top 200 best attackers and defenders.
+
+```{r PRINT TABLES 3, echo=FALSE}
+
+subdf <- subset(df, TotalRankOffense <= 200 | TotalRankDefense <= 200)
+output <- subdf[with(subdf, order(-GymOffense)), 
+      c("PokemonId", "Name", "PercentagePerfect", "Cp", "Level", "CpEvoTarget", "DustCost", "GymOffense", "TotalRankOffense", "TotalRankDefense")]
+kable(output)
+
+
+```
+
+
+
+
+```{r PLOTS, include=FALSE, eval=FALSE}
+
+plot(levels$CpMultiplier)
+
+```
+
