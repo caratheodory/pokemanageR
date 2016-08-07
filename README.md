@@ -6,8 +6,9 @@ RMarkdown script to display IVs, compute max and evolved CP, compute cost to evo
 Creates a dataframe with all information you need to be the very best.
 Actively looking for feedback and contributors!
 
-
 ![](assets/example.png)
+![](assets/example_plot.png)
+![](assets/example_plot2.png)
 
 ## Requirements
 
