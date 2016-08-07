@@ -19,6 +19,7 @@ Actively looking for feedback and contributors!
 1. Windows (for out of the box results)
 2. Working MITM (with SSL cert pinning disabled)
 3. RStudio and knitr
+4. Protobuf 3 compiler
 
 ## Setup
 
