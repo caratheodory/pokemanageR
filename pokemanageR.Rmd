@@ -151,11 +151,45 @@ kable(output)
 ```
 
 
+# Bonus plots
 
+## How does CpMultiplier scale?
 
-```{r PLOTS, include=FALSE, eval=FALSE}
+```{r PLOTS 1,  echo=FALSE}
 
 plot(levels$CpMultiplier)
+
+```
+
+## Scatterplot of PercentagePerfect vs CpPercentage
+
+```{r PLOTS 2, echo=FALSE}
+
+plot(df[c("PercentagePerfect", "CpPercentage")])
+
+```
+
+## Impact of IVs on CP
+
+```{r PLOTS 3, echo=FALSE}
+
+plot(mapply(compute_cp_max, 16, levels$CpMultiplier), type="b", main="PokemonId 16")
+lines(mapply(compute_cp, 16, 7.5, 7.5, 7.5, levels$CpMultiplier), type="b", pch=19)
+lines(mapply(compute_cp_min, 16, levels$CpMultiplier), type="b")
+
+```
+
+## IV distribution
+
+```{r PLOTS 4, echo=FALSE}
+
+subdf <- subset(df, PokemonId != 0)
+hist(c(subdf$IndividualAttack, subdf$IndividualDefense, subdf$IndividualStamina),
+     breaks = seq(-0.5, 15.5, 1), main="IV histogram")
+
+hist(subdf$IndividualAttack + subdf$IndividualDefense +subdf$IndividualStamina,
+     breaks = seq(-0.5, 45.5, 1), main="aggregated IV histogram")
+
 
 ```
 
