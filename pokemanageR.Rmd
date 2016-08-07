@@ -100,7 +100,7 @@ df <- add_best_movesets(df)
 
 # Add Cp of evo and evo at target level
 df$CpEvo <- mapply(compute_cp, df$MaxEvolutionId, df$IndividualAttack, df$IndividualDefense, 
-                   df$IndividualStamina, df$CpMultiplier)
+                   df$IndividualStamina, df$CpMultiplier+df$AdditionalCpMultiplier)
 
 df$CpEvoTarget <- mapply(compute_cp, df$MaxEvolutionId, df$IndividualAttack, 
                          df$IndividualDefense, df$IndividualStamina, compute_cpmultiplier(targetLevel))
@@ -145,6 +145,17 @@ Display all pokemon/moveset combinations that make it to the top 200 best attack
 subdf <- subset(df, TotalRankOffense <= 200 | TotalRankDefense <= 200)
 output <- subdf[with(subdf, order(-GymOffense)), 
       c("PokemonId", "Name", "PercentagePerfect", "Cp", "Level", "CpEvoTarget", "DustCost", "GymOffense", "TotalRankOffense", "TotalRankDefense")]
+kable(output)
+
+
+```
+
+# Evolution Calculator
+
+```{r PRINT TABLES 4, echo=FALSE}
+
+output <- df[with(df, order(PokemonId, -Cp)), 
+             c("PokemonId", "Name", "Level", "PercentagePerfect", "Cp", "CpEvo")]
 kable(output)
 
 
