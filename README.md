@@ -7,15 +7,19 @@ Creates a table (dataframe) with all information you need to be the very best (I
 
 Actively looking for feedback and contributors!
 
-![](assets/example.png)
-![](assets/example_plot.png)
+## Preview
+
+![](assets/example2.png)
 ![](assets/example_plot2.png)
+![](assets/example_plot.png)
+![](assets/example_plot3.png)
 
 ## Requirements
 
 1. Windows (for out of the box results)
 2. Working MITM (with SSL cert pinning disabled)
 3. RStudio and knitr
+4. Protobuf 3 compiler
 
 ## Setup
 
