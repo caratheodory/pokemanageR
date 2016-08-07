@@ -1,9 +1,10 @@
-# pokemanageR
-RMarkdown script to display IVs, compute max and evolved CP, compute cost to evolve, offense/defense rank (according to Professor Kukui) and much more.
+# PokemanageR
+RMarkdown script to manage Pokemons, make optimal decisions and analyse data in R.
 
 **Requires a working MITM, use at your own risk (please refrain from asking questions how to set up MITM).**
 
-Creates a dataframe with all information you need to be the very best.
+Creates a table (dataframe) with all information you need to be the very best (IVs, max and evolved CP, cost to evolve, offense/defense rank according to Professor Kukui and many more).
+
 Actively looking for feedback and contributors!
 
 ![](assets/example.png)
